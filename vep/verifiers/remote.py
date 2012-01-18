@@ -36,7 +36,9 @@
 
 import json
 
-from vep.utils import secure_urlopen, get_assertion_info
+from vep.utils import (secure_urlopen,
+                       decode_json_bytes,
+                       unbundle_certs_and_assertion)
 from vep.errors import (InvalidSignatureError,
                         ConnectionError,
                         AudienceMismatchError)
@@ -80,7 +82,10 @@ class RemoteVerifier(object):
         # Read audience from assertion if not specified.
         if audience is None:
             try:
-                audience = get_assertion_info(assertion)["audience"]
+                _, assertion = unbundle_certs_and_assertion(assertion)
+                # Get the audience out of the assertion token.
+                payload = decode_json_bytes(assertion.split(".")[1])
+                audience = payload["aud"]
             except (KeyError, IndexError):
                 raise ValueError("Malformed JWT")
         # Encode the data into x-www-form-urlencoded.
