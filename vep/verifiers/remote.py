@@ -82,9 +82,9 @@ class RemoteVerifier(object):
         # Read audience from assertion if not specified.
         if audience is None:
             try:
-                _, assertion = unbundle_certs_and_assertion(assertion)
+                _, unbundled = unbundle_certs_and_assertion(assertion)
                 # Get the audience out of the assertion token.
-                payload = decode_json_bytes(assertion.split(".")[1])
+                payload = decode_json_bytes(unbundled.split(".")[1])
                 audience = payload["aud"]
             except (KeyError, IndexError):
                 raise ValueError("Malformed JWT")
